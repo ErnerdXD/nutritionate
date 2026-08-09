@@ -63,6 +63,11 @@ export function createApp({ coach, productResearch } = {}) {
               "AI quota reached. Wait for the quota to reset or enable Gemini API billing.",
           });
         }
+        if (error?.status === 503 || error?.code === 503) {
+          return response.status(503).json({
+            error: "The AI service is busy. Please wait a moment and try again.",
+          });
+        }
         return response.status(502).json({
           error: "The nutrition assistant is temporarily unavailable",
           requestId: response.locals.requestId,
@@ -100,6 +105,11 @@ export function createApp({ coach, productResearch } = {}) {
           return response.status(429).json({
             error:
               "AI research quota reached. Wait for the daily quota to reset or enable Gemini API billing.",
+          });
+        }
+        if (error?.status === 503 || error?.code === 503) {
+          return response.status(503).json({
+            error: "The AI service is busy. Please wait a moment and try again.",
           });
         }
         return response.status(502).json({

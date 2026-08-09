@@ -1,5 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
+import { generateWithRetry } from "./geminiRetry.js";
+
 import { productResearchResponseSchema } from "./schemas.js";
 
 const responseJsonSchema = {
@@ -123,8 +125,8 @@ export function createProductResearch({ apiKey = process.env.GEMINI_API_KEY } = 
   const ai = new GoogleGenAI({ apiKey });
 
   return async function research({ barcode, images }) {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+    const response = await generateWithRetry(() => ai.models.generateContent({
+      model: "gemini-3.5-flash-lite",
       contents: [
         ...images.map((image) => ({ inlineData: image })),
         { text: `Extract the photographed packaged food for barcode ${barcode}.` },
@@ -135,7 +137,7 @@ export function createProductResearch({ apiKey = process.env.GEMINI_API_KEY } = 
         responseJsonSchema,
         maxOutputTokens: 4096,
       },
-    });
+    }));
 
     if (!response.text) throw new Error("Gemini returned an empty response");
     const extracted = productResearchResponseSchema.parse(
