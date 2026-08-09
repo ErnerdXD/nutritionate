@@ -105,15 +105,140 @@ class _ProfileScreenState extends State<ProfileScreen> {
     onboardingComplete: onboardingComplete ?? _preferences.onboardingComplete,
   );
 
-  Future<void> _resetOnboarding() async {
-    setState(() => _saving = true);
+  UserPreferences _withPersonalDetails({
+    required int? age,
+    required double? weightKg,
+    required double? heightCm,
+  }) => UserPreferences(
+    goal: _preferences.goal,
+    dietaryPattern: _preferences.dietaryPattern,
+    allergens: _preferences.allergens,
+    priorities: _preferences.priorities,
+    servingBasis: _preferences.servingBasis,
+    metricUnits: _preferences.metricUnits,
+    safetyAcknowledged: _preferences.safetyAcknowledged,
+    age: age,
+    weightKg: weightKg,
+    heightCm: heightCm,
+    nutritionAssistantEnabled: _preferences.nutritionAssistantEnabled,
+    onboardingComplete: _preferences.onboardingComplete,
+  );
+
+  Future<void> _editPersonalDetails() async {
+    final age = TextEditingController(text: _preferences.age?.toString() ?? '');
+    final weight = TextEditingController(
+      text: _preferences.weightKg?.toString() ?? '',
+    );
+    final height = TextEditingController(
+      text: _preferences.heightCm?.toString() ?? '',
+    );
+    var preferNotToSay =
+        _preferences.age == null &&
+        _preferences.weightKg == null &&
+        _preferences.heightCm == null;
+    final result = await showDialog<UserPreferences>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Edit personal details'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: age,
+                  enabled: !preferNotToSay,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Age (years)'),
+                ),
+                TextField(
+                  controller: weight,
+                  enabled: !preferNotToSay,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(labelText: 'Weight (kg)'),
+                ),
+                TextField(
+                  controller: height,
+                  enabled: !preferNotToSay,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(labelText: 'Height (cm)'),
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: preferNotToSay,
+                  onChanged: (value) =>
+                      setDialogState(() => preferNotToSay = value ?? false),
+                  title: const Text('Prefer not to tell'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final nextAge = preferNotToSay
+                    ? null
+                    : int.tryParse(age.text.trim());
+                final nextWeight = preferNotToSay
+                    ? null
+                    : double.tryParse(weight.text.trim());
+                final nextHeight = preferNotToSay
+                    ? null
+                    : double.tryParse(height.text.trim());
+                final valid =
+                    (nextAge == null || nextAge >= 13 && nextAge <= 120) &&
+                    (nextWeight == null ||
+                        nextWeight >= 20 && nextWeight <= 400) &&
+                    (nextHeight == null ||
+                        nextHeight >= 80 && nextHeight <= 250);
+                if (!valid) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(content: Text('Check the entered values.')),
+                  );
+                  return;
+                }
+                Navigator.pop(
+                  dialogContext,
+                  _withPersonalDetails(
+                    age: nextAge,
+                    weightKg: nextWeight,
+                    heightCm: nextHeight,
+                  ),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+    age.dispose();
+    weight.dispose();
+    height.dispose();
+    if (result == null) return;
+    setState(() {
+      _preferences = result;
+      _saving = true;
+    });
     try {
-      await _service.save(_user, _copy(onboardingComplete: false));
-      await AuthService.instance.signOut();
+      await _service.save(_user, result);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Personal details updated.')),
+        );
+      }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not reset onboarding.')),
+          const SnackBar(content: Text('Could not update personal details.')),
         );
       }
     } finally {
@@ -208,9 +333,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 OutlinedButton.icon(
-                  onPressed: _saving ? null : _resetOnboarding,
-                  icon: const Icon(Icons.restart_alt),
-                  label: const Text('Run first-time setup again'),
+                  onPressed: _saving ? null : _editPersonalDetails,
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Edit age, weight & height'),
                 ),
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(

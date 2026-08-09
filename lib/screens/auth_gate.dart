@@ -7,8 +7,15 @@ import 'home_screen.dart';
 import 'login_screen.dart';
 import 'onboarding_screen.dart';
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  bool _signingOutIncompleteSession = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +37,22 @@ class AuthGate extends StatelessWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return onboarding.data == true
-                ? const HomeScreen()
-                : OnboardingScreen(user: user);
+            if (onboarding.data == true) return const HomeScreen();
+            if (!AuthService.instance.signedInDuringThisRun) {
+              if (!_signingOutIncompleteSession) {
+                _signingOutIncompleteSession = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  await AuthService.instance.signOut();
+                  if (mounted) {
+                    setState(() => _signingOutIncompleteSession = false);
+                  }
+                });
+              }
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return OnboardingScreen(user: user);
           },
         );
       },

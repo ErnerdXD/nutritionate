@@ -25,6 +25,17 @@ export const coachRequestSchema = z.object({
     )
     .max(6)
     .optional(),
+  userProfile: z
+    .object({
+      age: z.number().int().min(13).max(120).nullable(),
+      weightKg: z.number().min(20).max(400).nullable(),
+      heightCm: z.number().min(80).max(250).nullable(),
+      dietaryPattern: z.string().trim().max(80),
+      allergens: z.array(z.string().trim().max(40)).max(12),
+      priorities: z.array(z.string().trim().max(40)).max(10),
+      servingBasis: z.string().trim().max(40),
+    })
+    .optional(),
   product: z.object({
     barcode: z.string().regex(/^\d{8,14}$/),
     name: z.string().trim().min(1).max(160),

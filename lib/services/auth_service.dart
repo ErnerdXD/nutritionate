@@ -7,9 +7,21 @@ class AuthService {
 
   final _google = GoogleSignIn.instance;
   bool _initialized = false;
+  bool _signedInDuringThisRun = false;
+  bool _suppressWelcomeBack = false;
+  bool _welcomeShownThisRun = false;
 
   Stream<User?> get authChanges => FirebaseAuth.instance.authStateChanges();
   User? get currentUser => FirebaseAuth.instance.currentUser;
+  bool get signedInDuringThisRun => _signedInDuringThisRun;
+
+  bool takeWelcomeBack() {
+    if (_suppressWelcomeBack || _welcomeShownThisRun) {
+      return false;
+    }
+    _welcomeShownThisRun = true;
+    return true;
+  }
 
   Future<void> _initialize() async {
     if (_initialized) return;
@@ -28,11 +40,18 @@ class AuthService {
       );
     }
     final credential = GoogleAuthProvider.credential(idToken: idToken);
-    return FirebaseAuth.instance.signInWithCredential(credential);
+    final result = await FirebaseAuth.instance.signInWithCredential(credential);
+    _signedInDuringThisRun = true;
+    _suppressWelcomeBack = result.additionalUserInfo?.isNewUser == true;
+    _welcomeShownThisRun = false;
+    return result;
   }
 
   Future<void> signOut() async {
     await _initialize();
     await Future.wait([FirebaseAuth.instance.signOut(), _google.signOut()]);
+    _signedInDuringThisRun = false;
+    _suppressWelcomeBack = false;
+    _welcomeShownThisRun = false;
   }
 }

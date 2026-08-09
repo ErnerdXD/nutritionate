@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../models/food_product.dart';
 import 'byok_service.dart';
 import 'nutrition_coach.dart';
+import 'profile_service.dart';
 
 class GeminiCoachException implements Exception {
   const GeminiCoachException(this.message);
@@ -35,12 +36,14 @@ class GeminiCoachClient {
     List<Map<String, String>> recentConversation = const [],
   }) async {
     try {
-      final token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      if (token == null) {
+      final user = FirebaseAuth.instance.currentUser;
+      final token = await user?.getIdToken();
+      if (user == null || token == null) {
         throw const GeminiCoachException(
           'Please sign in to use the assistant.',
         );
       }
+      final preferences = await ProfileService().load(user);
       final apiKey = await ByokService.instance.readForCurrentUser();
       if (apiKey == null) {
         throw const GeminiCoachException(
@@ -59,6 +62,15 @@ class GeminiCoachClient {
               'question': question,
               'goal': goal.name,
               'recentConversation': recentConversation,
+              'userProfile': {
+                'age': preferences.age,
+                'weightKg': preferences.weightKg,
+                'heightCm': preferences.heightCm,
+                'dietaryPattern': preferences.dietaryPattern,
+                'allergens': preferences.allergens,
+                'priorities': preferences.priorities,
+                'servingBasis': preferences.servingBasis,
+              },
               if (product != null) 'product': _productJson(product),
             }),
           )
