@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/food_product.dart';
 import '../services/gemini_coach_client.dart';
+import '../services/byok_service.dart';
 import '../services/nutrition_coach.dart';
 import '../services/scan_history_store.dart';
+import 'profile_screen.dart';
 
 class NutritionAssistantScreen extends StatefulWidget {
   const NutritionAssistantScreen({super.key, this.product});
@@ -26,6 +28,8 @@ class _NutritionAssistantScreenState extends State<NutritionAssistantScreen> {
   final _geminiCoach = GeminiCoachClient();
   final _messages = <_Message>[];
   bool _isSending = false;
+  bool _checkingAccess = true;
+  bool _assistantAvailable = false;
   NutritionGoal _goal = NutritionGoal.balanced;
   FoodProduct? _product;
 
@@ -41,7 +45,26 @@ class _NutritionAssistantScreenState extends State<NutritionAssistantScreen> {
         false,
       ),
     );
-    if (widget.product == null) _loadLatestProduct();
+    _checkAssistantAccess();
+  }
+
+  Future<void> _checkAssistantAccess() async {
+    final key = await ByokService.instance.readForCurrentUser();
+    if (!mounted) return;
+    setState(() {
+      _assistantAvailable = key != null;
+      _checkingAccess = false;
+    });
+    if (key != null && widget.product == null) await _loadLatestProduct();
+  }
+
+  Future<void> _openProfile() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+    if (!mounted) return;
+    setState(() => _checkingAccess = true);
+    await _checkAssistantAccess();
   }
 
   Future<void> _loadLatestProduct() async {
@@ -126,6 +149,55 @@ class _NutritionAssistantScreenState extends State<NutritionAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingAccess) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (!_assistantAvailable) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Nutrition Assistant')),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.lock_outline,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Nutrition Assistant is not enabled',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Go to your Profile and enable the assistant with your Gemini API key.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: _openProfile,
+                    icon: const Icon(Icons.account_circle_outlined),
+                    label: const Text('Go to Profile'),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Back to home'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Nutrition Assistant')),
       body: Column(

@@ -15,10 +15,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _busy = false;
 
-  Future<void> _signIn() async {
+  Future<void> _signIn({required bool loginOnly}) async {
     setState(() => _busy = true);
     try {
-      await AuthService.instance.signInWithGoogle();
+      await AuthService.instance.signInWithGoogle(loginOnly: loginOnly);
     } on GoogleSignInException catch (error) {
       if (error.code != GoogleSignInExceptionCode.canceled) {
         _showError(error.description ?? 'Google sign-in failed.');
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const Spacer(),
               FilledButton.icon(
-                onPressed: _busy ? null : _signIn,
+                onPressed: _busy ? null : () => _signIn(loginOnly: false),
                 icon: _busy
                     ? const SizedBox.square(
                         dimension: 20,
@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                onPressed: _busy ? null : _signIn,
+                onPressed: _busy ? null : () => _signIn(loginOnly: true),
                 icon: const Icon(Icons.login),
                 label: const Text('Log in with Google'),
                 style: OutlinedButton.styleFrom(

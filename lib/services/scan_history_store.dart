@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/food_product.dart';
@@ -26,11 +27,18 @@ class ScanHistoryEntry {
 }
 
 class ScanHistoryStore {
-  static const _key = 'scan_history_v1';
+  static String keyForUser(String uid) => 'scan_history_v2_$uid';
+
+  String? get _key {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    return uid == null ? null : keyForUser(uid);
+  }
 
   Future<List<ScanHistoryEntry>> getAll() async {
+    final key = _key;
+    if (key == null) return const [];
     final preferences = await SharedPreferences.getInstance();
-    final raw = preferences.getStringList(_key) ?? const [];
+    final raw = preferences.getStringList(key) ?? const [];
     return raw
         .map(
           (value) => ScanHistoryEntry.fromJson(
@@ -41,8 +49,10 @@ class ScanHistoryStore {
   }
 
   Future<void> add(FoodProduct product) async {
+    final key = _key;
+    if (key == null) return;
     final preferences = await SharedPreferences.getInstance();
-    final history = preferences.getStringList(_key) ?? <String>[];
+    final history = preferences.getStringList(key) ?? <String>[];
     history.insert(
       0,
       jsonEncode(
@@ -50,11 +60,13 @@ class ScanHistoryStore {
       ),
     );
     if (history.length > 50) history.removeRange(50, history.length);
-    await preferences.setStringList(_key, history);
+    await preferences.setStringList(key, history);
   }
 
   Future<void> clear() async {
+    final key = _key;
+    if (key == null) return;
     final preferences = await SharedPreferences.getInstance();
-    await preferences.remove(_key);
+    await preferences.remove(key);
   }
 }

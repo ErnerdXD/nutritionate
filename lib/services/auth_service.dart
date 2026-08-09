@@ -29,7 +29,7 @@ class AuthService {
     _initialized = true;
   }
 
-  Future<UserCredential> signInWithGoogle() async {
+  Future<UserCredential> signInWithGoogle({bool loginOnly = false}) async {
     await _initialize();
     final account = await _google.authenticate();
     final idToken = account.authentication.idToken;
@@ -41,6 +41,16 @@ class AuthService {
     }
     final credential = GoogleAuthProvider.credential(idToken: idToken);
     final result = await FirebaseAuth.instance.signInWithCredential(credential);
+    if (loginOnly && result.additionalUserInfo?.isNewUser == true) {
+      await result.user?.delete();
+      try {
+        await _google.signOut();
+      } catch (_) {}
+      throw FirebaseAuthException(
+        code: 'nutritionate-account-not-found',
+        message: 'This account does not exist yet. Please sign up first.',
+      );
+    }
     _signedInDuringThisRun = true;
     _suppressWelcomeBack = result.additionalUserInfo?.isNewUser == true;
     _welcomeShownThisRun = false;
