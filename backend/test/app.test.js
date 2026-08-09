@@ -48,6 +48,20 @@ test("health endpoint does not expose secrets", async () => {
   });
 });
 
+test("accepts the hosting proxy client address", async () => {
+  await withServer(async () => ({ answer: "Hello.", cautions: [] }), async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/v1/coach`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Forwarded-For": "203.0.113.10",
+      },
+      body: JSON.stringify({ question: "hello", goal: "balanced" }),
+    });
+    assert.equal(response.status, 200);
+  });
+});
+
 test("coach validates input and returns structured output", async () => {
   const coach = async () => ({ answer: "One serving has verified values.", cautions: [] });
   await withServer(coach, async (baseUrl) => {

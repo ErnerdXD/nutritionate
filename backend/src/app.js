@@ -15,6 +15,10 @@ export function createApp({ coach, productResearch } = {}) {
   let resolvedProductResearch = productResearch;
 
   app.disable("x-powered-by");
+  // Render terminates HTTPS in front of the Node service and supplies the
+  // original client address in X-Forwarded-For. Trust exactly that first hop
+  // so express-rate-limit keys requests by the real client IP.
+  app.set("trust proxy", 1);
   app.use(helmet());
   app.use((request, response, next) => {
     response.locals.requestId = crypto.randomUUID();
