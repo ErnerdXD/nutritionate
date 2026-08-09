@@ -10,10 +10,17 @@ class AuthService {
   bool _signedInDuringThisRun = false;
   bool _suppressWelcomeBack = false;
   bool _welcomeShownThisRun = false;
+  String? _pendingLoginMessage;
 
   Stream<User?> get authChanges => FirebaseAuth.instance.authStateChanges();
   User? get currentUser => FirebaseAuth.instance.currentUser;
   bool get signedInDuringThisRun => _signedInDuringThisRun;
+
+  String? takePendingLoginMessage() {
+    final value = _pendingLoginMessage;
+    _pendingLoginMessage = null;
+    return value;
+  }
 
   bool takeWelcomeBack() {
     if (_suppressWelcomeBack || _welcomeShownThisRun) {
@@ -46,6 +53,8 @@ class AuthService {
       try {
         await _google.signOut();
       } catch (_) {}
+      _pendingLoginMessage =
+          'This Google account does not have a Nutritionate account yet. Please register using Sign up with Google.';
       throw FirebaseAuthException(
         code: 'nutritionate-account-not-found',
         message: 'This account does not exist yet. Please sign up first.',

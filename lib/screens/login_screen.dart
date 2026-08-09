@@ -15,6 +15,15 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _busy = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final message = AuthService.instance.takePendingLoginMessage();
+      if (mounted && message != null) _showAccountNotFound(message);
+    });
+  }
+
   Future<void> _signIn({required bool loginOnly}) async {
     setState(() => _busy = true);
     try {
@@ -24,12 +33,45 @@ class _LoginScreenState extends State<LoginScreen> {
         _showError(error.description ?? 'Google sign-in failed.');
       }
     } on FirebaseAuthException catch (error) {
-      _showError(error.message ?? 'Firebase sign-in failed.');
+      if (error.code == 'nutritionate-account-not-found') {
+        if (mounted) {
+          final message =
+              AuthService.instance.takePendingLoginMessage() ??
+              error.message ??
+              'This account does not exist yet. Please sign up first.';
+          await _showAccountNotFound(message);
+        }
+      } else {
+        _showError(error.message ?? 'Firebase sign-in failed.');
+      }
     } catch (_) {
       _showError('Could not sign in. Check your connection and try again.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _showAccountNotFound(String message) async {
+    if (!mounted) return;
+    final signUp = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.person_add_alt_1_outlined),
+        title: const Text('No Nutritionate account'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sign up'),
+          ),
+        ],
+      ),
+    );
+    if (signUp == true && mounted) await _signIn(loginOnly: false);
   }
 
   void _showError(String message) {
