@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "199852831483",
+    "project_id": "nutritionate-ernest",
+    "storage_bucket": "nutritionate-ernest.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199852831483:android:6f72f8aff8b940fc56765e",
+        "android_client_info": {
+          "package_name": "com.ernest.nutriscan.nutriscan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "199852831483-3tdulc7fe08sp1tovs9jgree12dq43kq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ernest.nutriscan.nutriscan",
+            "certificate_hash": "271ff470608525ac8e4eb811541f1f7750ebc9de"
+          }
+        },
+        {
+          "client_id": "199852831483-6fgb2imivm79gumhmv3hr9qur6imhjhg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFhr9iFG1bd8w211xtpjyNLiK_L4Dv8lA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "199852831483-6fgb2imivm79gumhmv3hr9qur6imhjhg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
