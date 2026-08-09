@@ -257,6 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _service.save(_user, _preferences);
       if (mounted) {
+        ThemeService.instance.apply(darkMode: _preferences.darkMode);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Preferences saved.')));
@@ -607,10 +608,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     'Switch between light and dark appearance.',
                   ),
                   value: _preferences.darkMode,
-                  onChanged: (value) {
-                    setState(() => _preferences = _copy(darkMode: value));
-                    ThemeService.instance.apply(darkMode: value);
-                  },
+                  onChanged: (value) =>
+                      setState(() => _preferences = _copy(darkMode: value)),
                 ),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,

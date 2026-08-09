@@ -52,6 +52,37 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Future<void> _setAssistantEnabled(bool enabled) async {
+    if (!enabled) {
+      setState(() => _assistantEnabled = false);
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.key_outlined),
+        title: const Text('Allow Gemini API key setup?'),
+        content: const Text(
+          'Nutritionate will open Google AI Studio. You will choose or create a Google project and create the API key yourself, then copy it back here. Nutritionate cannot create the project or retrieve the key automatically.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _assistantEnabled = true);
+    await _openAiStudio();
+  }
+
   Future<void> _finish() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -169,7 +200,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _assistantEnabled,
-                onChanged: (value) => setState(() => _assistantEnabled = value),
+                onChanged: _setAssistantEnabled,
                 title: const Text('Enable Nutrition Assistant?'),
                 subtitle: const Text(
                   'Optional AI chat and photo-assisted product setup.',
