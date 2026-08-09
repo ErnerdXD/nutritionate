@@ -48,10 +48,21 @@ class AuthService {
   }
 
   Future<void> signOut() async {
-    await _initialize();
-    await Future.wait([FirebaseAuth.instance.signOut(), _google.signOut()]);
-    _signedInDuringThisRun = false;
-    _suppressWelcomeBack = false;
-    _welcomeShownThisRun = false;
+    try {
+      // Firebase controls the app session, so always clear it first. A stale
+      // Google provider session must never prevent the user from signing out.
+      await FirebaseAuth.instance.signOut();
+      try {
+        await _initialize();
+        await _google.signOut();
+      } catch (_) {
+        // Firebase is already signed out; Google will show account selection
+        // again if its local provider state could not be cleared.
+      }
+    } finally {
+      _signedInDuringThisRun = false;
+      _suppressWelcomeBack = false;
+      _welcomeShownThisRun = false;
+    }
   }
 }

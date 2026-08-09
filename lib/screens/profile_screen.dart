@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/user_preferences.dart';
 import '../services/auth_service.dart';
+import '../services/byok_service.dart';
 import '../services/profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -266,6 +268,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _manageAssistant() async {
+    final existingKey = await ByokService.instance.readForCurrentUser();
+    if (!mounted) return;
+    final keyController = TextEditingController();
+    var enabled = _preferences.nutritionAssistantEnabled;
+    var hideKey = true;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Nutrition Assistant'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: enabled,
+                  onChanged: (value) => setDialogState(() => enabled = value),
+                  title: const Text('Enable assistant'),
+                ),
+                if (enabled) ...[
+                  Text(
+                    existingKey == null
+                        ? 'Add your Gemini key to enable AI features.'
+                        : 'A Gemini key is already encrypted on this phone. Leave this blank to keep it, or paste a new key to replace it.',
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri.parse('https://aistudio.google.com/app/apikey'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.open_in_new),
+                    label: const Text('Get a Gemini API key'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: keyController,
+                    obscureText: hideKey,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      labelText: existingKey == null
+                          ? 'Paste Gemini API key'
+                          : 'Replacement key (optional)',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () =>
+                            setDialogState(() => hideKey = !hideKey),
+                        icon: Icon(
+                          hideKey ? Icons.visibility : Icons.visibility_off,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final enteredKey = keyController.text.trim();
+                if (enabled && existingKey == null && enteredKey.isEmpty) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(content: Text('Paste a Gemini API key.')),
+                  );
+                  return;
+                }
+                if (enteredKey.isNotEmpty &&
+                    !ByokService.isSupportedGeminiKey(enteredKey)) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Enter a valid Gemini API key.'),
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) {
+      keyController.dispose();
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      final enteredKey = keyController.text.trim();
+      if (!enabled) {
+        await ByokService.instance.deleteForUser(_user);
+      } else if (enteredKey.isNotEmpty) {
+        await ByokService.instance.saveForUser(_user, enteredKey);
+      }
+      final updated = _copy(nutritionAssistantEnabled: enabled);
+      await _service.save(_user, updated);
+      if (mounted) {
+        setState(() => _preferences = updated);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              enabled
+                  ? 'Nutrition Assistant enabled.'
+                  : 'Nutrition Assistant disabled and key removed.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not update the assistant.')),
+        );
+      }
+    } finally {
+      keyController.dispose();
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _signOut() async {
+    setState(() => _saving = true);
+    try {
+      await AuthService.instance.signOut();
+      if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not sign out. Try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -331,6 +479,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? 'Enabled with your encrypted Gemini key'
                         : 'Not enabled',
                   ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _saving ? null : _manageAssistant,
                 ),
                 OutlinedButton.icon(
                   onPressed: _saving ? null : _editPersonalDetails,
@@ -470,7 +620,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label: const Text('Save preferences'),
                 ),
                 TextButton.icon(
-                  onPressed: _saving ? null : AuthService.instance.signOut,
+                  onPressed: _saving ? null : _signOut,
                   icon: const Icon(Icons.logout),
                   label: const Text('Sign out'),
                 ),
