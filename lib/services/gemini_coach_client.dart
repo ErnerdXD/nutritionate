@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/food_product.dart';
+import 'byok_service.dart';
 import 'nutrition_coach.dart';
 
 class GeminiCoachException implements Exception {
@@ -36,7 +37,15 @@ class GeminiCoachClient {
     try {
       final token = await FirebaseAuth.instance.currentUser?.getIdToken();
       if (token == null) {
-        throw const GeminiCoachException('Please sign in to use the assistant.');
+        throw const GeminiCoachException(
+          'Please sign in to use the assistant.',
+        );
+      }
+      final apiKey = await ByokService.instance.readForCurrentUser();
+      if (apiKey == null) {
+        throw const GeminiCoachException(
+          'Enable the Nutrition Assistant and add your Gemini key in first-time setup.',
+        );
       }
       final response = await _client
           .post(
@@ -44,6 +53,7 @@ class GeminiCoachClient {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
+              'X-Gemini-Api-Key': apiKey,
             },
             body: jsonEncode({
               'question': question,

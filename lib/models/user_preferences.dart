@@ -7,6 +7,11 @@ class UserPreferences {
     this.servingBasis = 'Per serving',
     this.metricUnits = true,
     this.safetyAcknowledged = false,
+    this.age,
+    this.weightKg,
+    this.heightCm,
+    this.nutritionAssistantEnabled = false,
+    this.onboardingComplete = false,
   });
 
   final String goal;
@@ -16,6 +21,11 @@ class UserPreferences {
   final String servingBasis;
   final bool metricUnits;
   final bool safetyAcknowledged;
+  final int? age;
+  final double? weightKg;
+  final double? heightCm;
+  final bool nutritionAssistantEnabled;
+  final bool onboardingComplete;
 
   Map<String, dynamic> toJson() => {
     'goal': goal,
@@ -25,6 +35,11 @@ class UserPreferences {
     'servingBasis': servingBasis,
     'metricUnits': metricUnits,
     'safetyAcknowledged': safetyAcknowledged,
+    'age': age,
+    'weightKg': weightKg,
+    'heightCm': heightCm,
+    'nutritionAssistantEnabled': nutritionAssistantEnabled,
+    'onboardingComplete': onboardingComplete,
   };
 
   factory UserPreferences.fromJson(Map<String, dynamic>? json) {
@@ -45,6 +60,12 @@ class UserPreferences {
       servingBasis: json['servingBasis'] as String? ?? 'Per serving',
       metricUnits: json['metricUnits'] as bool? ?? true,
       safetyAcknowledged: json['safetyAcknowledged'] as bool? ?? false,
+      age: (json['age'] as num?)?.toInt(),
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      heightCm: (json['heightCm'] as num?)?.toDouble(),
+      nutritionAssistantEnabled:
+          json['nutritionAssistantEnabled'] as bool? ?? false,
+      onboardingComplete: json['onboardingComplete'] as bool? ?? false,
     );
   }
 }

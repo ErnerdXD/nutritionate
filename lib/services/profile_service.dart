@@ -20,4 +20,9 @@ class ProfileService {
         'preferences': preferences.toJson(),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+
+  Future<bool> onboardingComplete(User user) async {
+    final preferences = await load(user);
+    return preferences.onboardingComplete;
+  }
 }

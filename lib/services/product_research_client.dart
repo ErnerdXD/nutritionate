@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
+import 'byok_service.dart';
+
 class ResearchSource {
   const ResearchSource({required this.title, required this.url});
   final String title;
@@ -39,6 +41,12 @@ class ProductResearchClient {
           'Please sign in to research a product.',
         );
       }
+      final apiKey = await ByokService.instance.readForCurrentUser();
+      if (apiKey == null) {
+        throw const ProductResearchException(
+          'Enable the Nutrition Assistant and add your Gemini key in first-time setup.',
+        );
+      }
       final images = <Map<String, String>>[];
       for (final path in imagePaths.take(3)) {
         final bytes = await File(path).readAsBytes();
@@ -60,6 +68,7 @@ class ProductResearchClient {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
+              'X-Gemini-Api-Key': apiKey,
             },
             body: jsonEncode({'barcode': barcode, 'images': images}),
           )

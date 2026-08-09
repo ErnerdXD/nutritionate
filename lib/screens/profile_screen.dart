@@ -84,6 +84,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? servingBasis,
     bool? metricUnits,
     bool? safetyAcknowledged,
+    int? age,
+    double? weightKg,
+    double? heightCm,
+    bool? nutritionAssistantEnabled,
+    bool? onboardingComplete,
   }) => UserPreferences(
     goal: goal ?? _preferences.goal,
     dietaryPattern: dietaryPattern ?? _preferences.dietaryPattern,
@@ -92,7 +97,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     servingBasis: servingBasis ?? _preferences.servingBasis,
     metricUnits: metricUnits ?? _preferences.metricUnits,
     safetyAcknowledged: safetyAcknowledged ?? _preferences.safetyAcknowledged,
+    age: age ?? _preferences.age,
+    weightKg: weightKg ?? _preferences.weightKg,
+    heightCm: heightCm ?? _preferences.heightCm,
+    nutritionAssistantEnabled:
+        nutritionAssistantEnabled ?? _preferences.nutritionAssistantEnabled,
+    onboardingComplete: onboardingComplete ?? _preferences.onboardingComplete,
   );
+
+  Future<void> _resetOnboarding() async {
+    setState(() => _saving = true);
+    try {
+      await _service.save(_user, _copy(onboardingComplete: false));
+      await AuthService.instance.signOut();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not reset onboarding.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   Future<void> _save() async {
     setState(() => _saving = true);
@@ -151,6 +178,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 28),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.badge_outlined),
+                  title: const Text('Personal details'),
+                  subtitle: Text(
+                    _preferences.age == null &&
+                            _preferences.weightKg == null &&
+                            _preferences.heightCm == null
+                        ? 'Prefer not to tell'
+                        : [
+                            if (_preferences.age != null)
+                              '${_preferences.age} years',
+                            if (_preferences.weightKg != null)
+                              '${_preferences.weightKg} kg',
+                            if (_preferences.heightCm != null)
+                              '${_preferences.heightCm} cm',
+                          ].join(' · '),
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.auto_awesome_outlined),
+                  title: const Text('Nutrition Assistant'),
+                  subtitle: Text(
+                    _preferences.nutritionAssistantEnabled
+                        ? 'Enabled with your encrypted Gemini key'
+                        : 'Not enabled',
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _saving ? null : _resetOnboarding,
+                  icon: const Icon(Icons.restart_alt),
+                  label: const Text('Run first-time setup again'),
+                ),
+                const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   initialValue: _preferences.goal,
                   decoration: const InputDecoration(

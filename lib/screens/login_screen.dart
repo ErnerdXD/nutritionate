@@ -84,8 +84,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.account_circle_outlined),
-                label: const Text('Continue with Google'),
+                label: const Text('Sign up with Google'),
                 style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _signIn,
+                icon: const Icon(Icons.login),
+                label: const Text('Log in with Google'),
+                style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                 ),
               ),

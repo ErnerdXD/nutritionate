@@ -48,8 +48,11 @@ export function createApp({ coach, productResearch } = {}) {
       }
 
       try {
-        resolvedCoach ??= createGeminiCoach();
-        const answer = await resolvedCoach(result.data);
+        const userApiKey = request.get("X-Gemini-Api-Key")?.trim();
+        const coachForRequest = userApiKey
+          ? createGeminiCoach({ apiKey: userApiKey })
+          : (resolvedCoach ??= createGeminiCoach());
+        const answer = await coachForRequest(result.data);
         return response.json({
           ...answer,
           disclaimer:
@@ -97,8 +100,11 @@ export function createApp({ coach, productResearch } = {}) {
         return response.status(400).json({ error: "Invalid research request" });
       }
       try {
-        resolvedProductResearch ??= createProductResearch();
-        return response.json(await resolvedProductResearch(result.data));
+        const userApiKey = request.get("X-Gemini-Api-Key")?.trim();
+        const researchForRequest = userApiKey
+          ? createProductResearch({ apiKey: userApiKey })
+          : (resolvedProductResearch ??= createProductResearch());
+        return response.json(await researchForRequest(result.data));
       } catch (error) {
         console.error("Product research failed", {
           requestId: response.locals.requestId,
