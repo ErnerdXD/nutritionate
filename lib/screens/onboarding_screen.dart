@@ -69,6 +69,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         priorities: existing.priorities,
         servingBasis: existing.servingBasis,
         metricUnits: existing.metricUnits,
+        darkMode: existing.darkMode,
         age: _preferNotToSay ? null : int.tryParse(_age.text.trim()),
         weightKg: _preferNotToSay ? null : double.tryParse(_weight.text.trim()),
         heightCm: _preferNotToSay ? null : double.tryParse(_height.text.trim()),
@@ -187,7 +188,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'You create a free Gemini API key with Google. Nutritionate encrypts it on this phone and uses your own Gemini allowance. The key is not saved in our database.',
+                          'Create a free Gemini API key with Google to unlock the Nutrition Assistant and AI analysis of up to 3 product or label photos. Nutritionate encrypts the key on this phone; it is not saved in our database.',
                         ),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(

@@ -6,6 +6,7 @@ import '../models/user_preferences.dart';
 import '../services/auth_service.dart';
 import '../services/byok_service.dart';
 import '../services/profile_service.dart';
+import '../services/theme_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -85,6 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     List<String>? priorities,
     String? servingBasis,
     bool? metricUnits,
+    bool? darkMode,
     bool? safetyAcknowledged,
     int? age,
     double? weightKg,
@@ -98,6 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     priorities: priorities ?? _preferences.priorities,
     servingBasis: servingBasis ?? _preferences.servingBasis,
     metricUnits: metricUnits ?? _preferences.metricUnits,
+    darkMode: darkMode ?? _preferences.darkMode,
     safetyAcknowledged: safetyAcknowledged ?? _preferences.safetyAcknowledged,
     age: age ?? _preferences.age,
     weightKg: weightKg ?? _preferences.weightKg,
@@ -118,6 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     priorities: _preferences.priorities,
     servingBasis: _preferences.servingBasis,
     metricUnits: _preferences.metricUnits,
+    darkMode: _preferences.darkMode,
     safetyAcknowledged: _preferences.safetyAcknowledged,
     age: age,
     weightKg: weightKg,
@@ -595,6 +599,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _preferences.metricUnits,
                   onChanged: (value) =>
                       setState(() => _preferences = _copy(metricUnits: value)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Dark mode'),
+                  subtitle: const Text(
+                    'Switch between light and dark appearance.',
+                  ),
+                  value: _preferences.darkMode,
+                  onChanged: (value) {
+                    setState(() => _preferences = _copy(darkMode: value));
+                    ThemeService.instance.apply(darkMode: value);
+                  },
                 ),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,

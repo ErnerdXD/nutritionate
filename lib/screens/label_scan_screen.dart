@@ -7,10 +7,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/food_product.dart';
 import '../services/local_product_store.dart';
+import '../services/byok_service.dart';
 import '../services/nutrition_label_parser.dart';
 import '../services/product_research_client.dart';
 import '../services/scan_history_store.dart';
 import 'product_screen.dart';
+import 'profile_screen.dart';
 
 class LabelScanScreen extends StatefulWidget {
   const LabelScanScreen({super.key, required this.barcode});
@@ -48,9 +50,36 @@ class _LabelScanScreenState extends State<LabelScanScreen> {
   ProductResearchResult? _researchResult;
   String _rawText = '';
   bool _busy = false;
+  bool _checkingAiAccess = true;
+  bool _aiEnabled = false;
   bool _valuesPer100g = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _refreshAiAccess();
+  }
+
+  Future<void> _refreshAiAccess() async {
+    final key = await ByokService.instance.readForCurrentUser();
+    if (!mounted) return;
+    setState(() {
+      _aiEnabled = key != null && ByokService.isSupportedGeminiKey(key);
+      _checkingAiAccess = false;
+    });
+  }
+
+  Future<void> _openProfile() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+    if (!mounted) return;
+    setState(() => _checkingAiAccess = true);
+    await _refreshAiAccess();
+  }
+
   Future<void> _addResearchPhoto(ImageSource source) async {
+    if (!_aiEnabled) return;
     if (_researchPhotos.length >= 3) return;
     final photo = await _picker.pickImage(
       source: source,
@@ -295,8 +324,34 @@ class _LabelScanScreenState extends State<LabelScanScreen> {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Add up to 3 clear photos: package front, barcode, and nutrition panel. AI will prefill a draft and show web sources for review.',
+                    'Add up to 3 clear photos: package front, barcode, and nutrition panel. AI can translate non-English labels into English, prefill a draft, and show web sources for review.',
                   ),
+                  if (_checkingAiAccess)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: LinearProgressIndicator(),
+                    )
+                  else if (!_aiEnabled) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'Photo upload is locked. Enable Nutrition Assistant with your Gemini API key in Profile to unlock analysis of up to 3 photos.',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: _openProfile,
+                      icon: const Icon(Icons.manage_accounts_outlined),
+                      label: const Text('Go to Profile'),
+                    ),
+                  ],
                   if (_researchPhotos.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     SizedBox(
@@ -337,7 +392,10 @@ class _LabelScanScreenState extends State<LabelScanScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _busy || _researchPhotos.length >= 3
+                          onPressed:
+                              !_aiEnabled ||
+                                  _busy ||
+                                  _researchPhotos.length >= 3
                               ? null
                               : () => _addResearchPhoto(ImageSource.camera),
                           icon: const Icon(Icons.camera_alt_outlined),
@@ -347,7 +405,10 @@ class _LabelScanScreenState extends State<LabelScanScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _busy || _researchPhotos.length >= 3
+                          onPressed:
+                              !_aiEnabled ||
+                                  _busy ||
+                                  _researchPhotos.length >= 3
                               ? null
                               : () => _addResearchPhoto(ImageSource.gallery),
                           icon: const Icon(Icons.photo_library_outlined),
@@ -357,7 +418,7 @@ class _LabelScanScreenState extends State<LabelScanScreen> {
                     ],
                   ),
                   FilledButton.icon(
-                    onPressed: _busy || _researchPhotos.isEmpty
+                    onPressed: !_aiEnabled || _busy || _researchPhotos.isEmpty
                         ? null
                         : _researchProduct,
                     icon: const Icon(Icons.travel_explore),

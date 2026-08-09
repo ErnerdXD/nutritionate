@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -48,17 +49,33 @@ class AuthService {
     }
     final credential = GoogleAuthProvider.credential(idToken: idToken);
     final result = await FirebaseAuth.instance.signInWithCredential(credential);
-    if (loginOnly && result.additionalUserInfo?.isNewUser == true) {
-      await result.user?.delete();
-      try {
-        await _google.signOut();
-      } catch (_) {}
-      _pendingLoginMessage =
-          'This Google account does not have a Nutritionate account yet. Please register using Sign up with Google.';
-      throw FirebaseAuthException(
-        code: 'nutritionate-account-not-found',
-        message: 'This account does not exist yet. Please sign up first.',
-      );
+    if (loginOnly) {
+      final user = result.user!;
+      final profile = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final preferences = profile.data()?['preferences'];
+      final registered =
+          profile.exists &&
+          preferences is Map<String, dynamic> &&
+          preferences['onboardingComplete'] == true;
+      if (!registered) {
+        if (result.additionalUserInfo?.isNewUser == true) {
+          await user.delete();
+        } else {
+          await FirebaseAuth.instance.signOut();
+        }
+        try {
+          await _google.signOut();
+        } catch (_) {}
+        _pendingLoginMessage =
+            'This Google account does not have a completed Nutritionate account yet. Please register using Sign up with Google.';
+        throw FirebaseAuthException(
+          code: 'nutritionate-account-not-found',
+          message: 'This account does not exist yet. Please sign up first.',
+        );
+      }
     }
     _signedInDuringThisRun = true;
     _suppressWelcomeBack = result.additionalUserInfo?.isNewUser == true;

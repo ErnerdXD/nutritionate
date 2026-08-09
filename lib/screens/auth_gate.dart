@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
+import '../services/theme_service.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 import 'onboarding_screen.dart';
@@ -28,16 +29,29 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
         final user = snapshot.data;
-        if (user == null) return const LoginScreen();
-        return FutureBuilder<bool>(
-          future: ProfileService().onboardingComplete(user),
+        if (user == null) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => ThemeService.instance.apply(darkMode: false),
+          );
+          return const LoginScreen();
+        }
+        return FutureBuilder(
+          future: ProfileService().load(user),
           builder: (context, onboarding) {
             if (onboarding.connectionState != ConnectionState.done) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            if (onboarding.data == true) return const HomeScreen();
+            final preferences = onboarding.data;
+            if (preferences?.onboardingComplete == true) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => ThemeService.instance.apply(
+                  darkMode: preferences!.darkMode,
+                ),
+              );
+              return const HomeScreen();
+            }
             if (!AuthService.instance.signedInDuringThisRun) {
               if (!_signingOutIncompleteSession) {
                 _signingOutIncompleteSession = true;

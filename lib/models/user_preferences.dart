@@ -6,6 +6,7 @@ class UserPreferences {
     this.priorities = const ['Calories', 'Protein', 'Sugar', 'Salt'],
     this.servingBasis = 'Per serving',
     this.metricUnits = true,
+    this.darkMode = false,
     this.safetyAcknowledged = false,
     this.age,
     this.weightKg,
@@ -20,6 +21,7 @@ class UserPreferences {
   final List<String> priorities;
   final String servingBasis;
   final bool metricUnits;
+  final bool darkMode;
   final bool safetyAcknowledged;
   final int? age;
   final double? weightKg;
@@ -34,6 +36,7 @@ class UserPreferences {
     'priorities': priorities,
     'servingBasis': servingBasis,
     'metricUnits': metricUnits,
+    'darkMode': darkMode,
     'safetyAcknowledged': safetyAcknowledged,
     'age': age,
     'weightKg': weightKg,
@@ -59,6 +62,7 @@ class UserPreferences {
       ]),
       servingBasis: json['servingBasis'] as String? ?? 'Per serving',
       metricUnits: json['metricUnits'] as bool? ?? true,
+      darkMode: json['darkMode'] as bool? ?? false,
       safetyAcknowledged: json['safetyAcknowledged'] as bool? ?? false,
       age: (json['age'] as num?)?.toInt(),
       weightKg: (json['weightKg'] as num?)?.toDouble(),
