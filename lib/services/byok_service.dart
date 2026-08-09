@@ -11,6 +11,13 @@ class ByokService {
 
   String _keyName(User user) => 'gemini_api_key_${user.uid}';
 
+  static bool isSupportedGeminiKey(String input) {
+    final value = input.trim();
+    if (value.contains(RegExp(r'\s'))) return false;
+    return (value.startsWith('AIza') && value.length >= 35) ||
+        (value.startsWith('AQ.') && value.length >= 30);
+  }
+
   Future<String?> readForCurrentUser() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
@@ -20,7 +27,7 @@ class ByokService {
 
   Future<void> saveForUser(User user, String apiKey) async {
     final value = apiKey.trim();
-    if (!value.startsWith('AIza') || value.length < 35) {
+    if (!isSupportedGeminiKey(value)) {
       throw const FormatException('Enter a valid Gemini API key.');
     }
     await _storage.write(key: _keyName(user), value: value);

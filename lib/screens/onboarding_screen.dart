@@ -218,8 +218,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   validator: (value) {
                     if (!_assistantEnabled) return null;
                     if (value == null ||
-                        !value.trim().startsWith('AIza') ||
-                        value.trim().length < 35) {
+                        !ByokService.isSupportedGeminiKey(value)) {
                       return 'Paste a valid Gemini API key';
                     }
                     return null;
