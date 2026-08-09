@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,8 +25,7 @@ class ProductResearchClient {
   static String get _baseUrl {
     const configured = String.fromEnvironment('COACH_API_URL');
     if (configured.isNotEmpty) return configured;
-    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8787';
-    return 'http://127.0.0.1:8787';
+    return 'https://nutritionate-backend.onrender.com';
   }
 
   Future<ProductResearchResult> research({
