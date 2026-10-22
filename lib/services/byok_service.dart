@@ -5,9 +5,7 @@ class ByokService {
   ByokService._();
   static final instance = ByokService._();
 
-  static const _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  static const _storage = FlutterSecureStorage(aOptions: AndroidOptions());
 
   String _keyName(User user) => 'gemini_api_key_${user.uid}';
 
