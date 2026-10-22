@@ -1,5 +1,11 @@
 # Nutritionate
 
+<p align="center">
+  <img src="assets/icon/nutritionate_icon.png" alt="Nutritionate app icon" width="180" />
+</p>
+
+<p align="center"><strong>Nutritionate — understand what you eat, one scan at a time.</strong></p>
+
 Nutritionate is a Flutter mobile app that helps people understand packaged-food nutrition quickly and safely. Users can sign in with Google, scan a barcode, photograph a nutrition panel, save product history, and review personal nutrition preferences in one place.
 
 When a barcode is not found, users who enable the optional Nutrition Assistant can submit up to three product photos for AI-assisted research. The assistant can help read nutrition panels, translate visible non-English packaging into English, compare packaging details, and prepare a draft for the user to review. AI features use BYOK (Bring Your Own Key): the user supplies their own Gemini API key, which is stored locally on the device and is not saved in the app database.
