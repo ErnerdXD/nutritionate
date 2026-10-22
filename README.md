@@ -14,6 +14,14 @@ The current Android sign-in screen introduces the two Google account flows:
 
 ![Nutritionate sign-in screen](assets/screenshots/nutritionate-home.png)
 
+The barcode scanner provides a camera view, scan frame, gallery upload, and image-crop options:
+
+![Nutritionate barcode scanner](assets/screenshots/nutritionate-scanner.png)
+
+The Nutrition Assistant includes a nutrition goal selector, conversation area, and food question input. It requires the user’s own Gemini key through BYOK:
+
+![Nutritionate Nutrition Assistant](assets/screenshots/nutritionate-chat.png)
+
 When a barcode is not found, users who enable the optional Nutrition Assistant can submit up to three product photos for AI-assisted research. The assistant can help read nutrition panels, translate visible non-English packaging into English, compare packaging details, and prepare a draft for the user to review. AI features use BYOK (Bring Your Own Key): the user supplies their own Gemini API key, which is stored locally on the device and is not saved in the app database.
 
 ## Features
