@@ -4,23 +4,29 @@
   <img src="assets/icon/nutritionate_icon.png" alt="Nutritionate app icon" width="180" />
 </p>
 
-<p align="center"><strong>Nutritionate â€” understand what you eat, one scan at a time.</strong></p>
+<p align="center"><strong>Nutritionate — understand what you eat, one scan at a time.</strong></p>
 
 Nutritionate is a Flutter mobile app that helps people understand packaged-food nutrition quickly and safely. Users can sign in with Google, scan a barcode, photograph a nutrition panel, save product history, and review personal nutrition preferences in one place.
 
+## Launch video
+
+<p align="center">
+  <img src="assets/video/nutritionate-launch.gif" alt="Nutritionate launch film" width="320" />
+</p>
+
+<p align="center">19-second launch film, rendered with HyperFrames. <a href="assets/video/nutritionate-launch.mp4">Watch with sound (MP4)</a>.</p>
+
 ## App preview
 
-The current Android sign-in screen introduces the two Google account flows:
+<p align="center">
+  <img src="assets/screenshots/nutritionate-home.png" alt="Sign-in screen" width="200" />
+  &nbsp;&nbsp;
+  <img src="assets/screenshots/nutritionate-scanner.png" alt="Barcode scanner" width="200" />
+  &nbsp;&nbsp;
+  <img src="assets/screenshots/nutritionate-chat.png" alt="Nutrition Assistant" width="200" />
+</p>
 
-<img src="assets/screenshots/nutritionate-home.png" alt="Nutritionate sign-in screen" width="280" />
-
-The barcode scanner provides a camera view, scan frame, gallery upload, and image-crop options:
-
-<img src="assets/screenshots/nutritionate-scanner.png" alt="Nutritionate barcode scanner" width="280" />
-
-The Nutrition Assistant includes a nutrition goal selector, conversation area, and food question input. It requires the userâ€™s own Gemini key through BYOK:
-
-<img src="assets/screenshots/nutritionate-chat.png" alt="Nutritionate Nutrition Assistant" width="280" />
+<p align="center"><sub>Sign in &nbsp;·&nbsp; Scan a barcode &nbsp;·&nbsp; Ask the assistant</sub></p>
 
 When a barcode is not found, users who enable the optional Nutrition Assistant can submit up to three product photos for AI-assisted research. The assistant can help read nutrition panels, translate visible non-English packaging into English, compare packaging details, and prepare a draft for the user to review. AI features use BYOK (Bring Your Own Key): the user supplies their own Gemini API key, which is stored locally on the device and is not saved in the app database.
 
