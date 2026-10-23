@@ -109,11 +109,3 @@ Nutritionate provides general nutrition information, not medical advice. Users s
 ## Future scope
 
 Planned improvements include broader product coverage, more language support, meal tracking, stronger nutrition personalization, improved offline behavior, and public release through the Google Play Store.
-
-## Launch video
-
-<p align="center">
-  <img src="assets/video/nutritionate-launch.gif" alt="Nutritionate launch film" width="320" />
-</p>
-
-<p align="center">19-second launch film, rendered with HyperFrames. <a href="assets/video/nutritionate-launch.mp4">Watch with sound (MP4)</a>.</p>
