@@ -1,10 +1,10 @@
-# Nutritionate
+﻿# Nutritionate
 
 <p align="center">
   <img src="assets/icon/nutritionate_icon.png" alt="Nutritionate app icon" width="180" />
 </p>
 
-<p align="center"><strong>Nutritionate — understand what you eat, one scan at a time.</strong></p>
+<p align="center"><strong>Nutritionate â€” understand what you eat, one scan at a time.</strong></p>
 
 Nutritionate is a Flutter mobile app that helps people understand packaged-food nutrition quickly and safely. Users can sign in with Google, scan a barcode, photograph a nutrition panel, save product history, and review personal nutrition preferences in one place.
 
@@ -18,7 +18,7 @@ The barcode scanner provides a camera view, scan frame, gallery upload, and imag
 
 <img src="assets/screenshots/nutritionate-scanner.png" alt="Nutritionate barcode scanner" width="280" />
 
-The Nutrition Assistant includes a nutrition goal selector, conversation area, and food question input. It requires the user’s own Gemini key through BYOK:
+The Nutrition Assistant includes a nutrition goal selector, conversation area, and food question input. It requires the userâ€™s own Gemini key through BYOK:
 
 <img src="assets/screenshots/nutritionate-chat.png" alt="Nutritionate Nutrition Assistant" width="280" />
 
@@ -106,7 +106,8 @@ Planned improvements include broader product coverage, more language support, me
 
 ## Launch video
 
-A 19-second vertical launch film rendered with HyperFrames from the brag plan in `brag-output-2026-10-23-145722/`.
+<p align="center">
+  <a href="assets/video/nutritionate-launch.mp4"><img src="assets/video/poster.jpg" alt="Nutritionate launch film" width="320" /></a>
+</p>
 
-[Download the launch video](assets/video/nutritionate-launch.mp4)
-
+<p align="center">A 19-second vertical launch film. Click the screen to play it.</p>
