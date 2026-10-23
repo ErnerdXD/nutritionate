@@ -107,7 +107,7 @@ Planned improvements include broader product coverage, more language support, me
 ## Launch video
 
 <p align="center">
-  <a href="assets/video/nutritionate-launch.mp4"><img src="assets/video/poster.jpg" alt="Nutritionate launch film" width="320" /></a>
+  <img src="assets/video/nutritionate-launch.gif" alt="Nutritionate launch film" width="320" />
 </p>
 
-<p align="center">A 19-second vertical launch film. Click the screen to play it.</p>
+<p align="center">19-second launch film, rendered with HyperFrames. <a href="assets/video/nutritionate-launch.mp4">Watch with sound (MP4)</a>.</p>
